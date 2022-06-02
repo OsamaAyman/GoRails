@@ -1,0 +1,24 @@
+USE [gorails]
+GO
+/****** Object:  StoredProcedure [dbo].[check_train]    Script Date: 12/22/2017 10:28:18 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[check_train]
+	@train_id int,
+	@avilable int output
+	
+AS
+BEGIN
+	if exists (select 1 from train where train_id=@train_id)
+	begin
+	set @avilable=1
+	end
+	else
+	begin
+	set @avilable=0;
+	end
+	return @avilable;
+END

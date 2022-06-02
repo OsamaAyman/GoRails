@@ -1,0 +1,27 @@
+USE [gorails]
+GO
+/****** Object:  StoredProcedure [dbo].[add_train]    Script Date: 12/22/2017 10:25:31 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[add_train]
+@department_date datetime,
+@department_location varchar(50),
+@arrival_date datetime,
+@destination varchar(50),
+@price money,
+@total_seats int
+
+AS
+BEGIN
+	declare @fc int,@bc int,@ec int,@duration int;
+	set @fc=(@total_seats*20/100);
+	set @bc=((@total_seats)*30/100);
+	set @ec=((@total_seats-@fc-@bc));
+	set @duration =(SELECT DATEDIFF(hh, @department_date, @arrival_date) as int);
+	insert into train (avilable_seats,first_class,business_class,economy_class,department_date,department_location,arrival_date,destination,duration,Price,total_seats)
+				 values (@total_seats,@fc,@bc,@ec,@department_date,@department_location,@arrival_date,@destination,@duration,@price,@total_seats);
+
+END

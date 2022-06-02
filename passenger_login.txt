@@ -1,0 +1,24 @@
+USE [gorails]
+GO
+/****** Object:  StoredProcedure [dbo].[passenger_login]    Script Date: 12/22/2017 10:29:03 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[passenger_login]
+	@pass_id int,
+	@pass_password varchar(50),
+	@output int output
+as
+BEGIN
+	IF Exists (select 1 from passenger where pass_id = @pass_id and pass_password=@pass_password)
+	begin 
+	set @output=1
+	end
+	else
+	begin
+	set @output=0
+	end
+	return @output
+END

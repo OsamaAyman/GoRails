@@ -1,0 +1,47 @@
+USE [gorails]
+GO
+/****** Object:  StoredProcedure [dbo].[delete_ticket]    Script Date: 12/22/2017 10:27:59 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[delete_ticket]
+	@ticket_id int,
+	@avilable int output
+	
+AS
+BEGIN
+	--check if the ticket existes
+	if exists (select 1 from ticket where @ticket_id=ticket.tickte_id)
+	begin 
+		set @avilable=1;
+		declare @x varchar(50);
+		declare @train_id int;
+		set @train_id=(select ticket.train_id from ticket  where tickte_id=@ticket_id);
+		set @x=(select ticket.class from ticket where tickte_id=@ticket_id);
+		update train set avilable_seats=avilable_seats+1 where train_id=@train_id;
+		if @x='First Class'
+		begin
+
+			update train set first_class=first_class+1 where train_id=@train_id;
+
+		end
+		else if @x='Buisness Class'
+		begin
+			update train set business_class=business_class+1 where train_id=@train_id;
+
+		end
+		else if @x='Economic Class'
+		begin
+			update train set economy_class=economy_class+1 where train_id=@train_id;
+		end	
+		delete from ticket where tickte_id=@ticket_id;
+		end 
+	else
+	begin
+		set @avilable=0;
+
+	end 
+	
+END

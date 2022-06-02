@@ -1,0 +1,106 @@
+USE [gorails]
+GO
+/****** Object:  StoredProcedure [dbo].[book_ticket]    Script Date: 12/22/2017 10:26:24 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROCEDURE [dbo].[book_ticket]
+	@train_id int,
+	@class varchar(50),
+	@pass_id int,
+	@date datetime,
+	@avilable int output,
+	@departime datetime output,
+	@departlocation varchar(50) output,
+	@train_arrival_time datetime output,
+	@train_arrivale_location varchar(50) output,
+	@duration int output
+	
+AS
+BEGIN
+	declare @x int;
+	declare @a int;
+	----------------------------------------------------------------------------------------------------
+	if @class='First Class'
+	begin
+
+	set @x=(select first_class from train where train_id=@train_id);
+	end
+	else if @class='Buisness Class'
+	begin
+	set @x=(select business_class from train where train_id=@train_id);
+
+	end
+	else if @class='Economic Class'
+	begin
+	set @x=(select business_class from train where train_id=@train_id);
+
+	end
+	set @a=(select train.total_seats from train where train_id=@train_id);
+
+	---------------------------------------------------------------------------------------------------------------------------
+	if @x <=0 and (select count(ticket.status) from ticket where ticket.train_id=@train_id)>=(@a/10)
+	begin
+	set @avilable=0;
+	end
+	---------------------------------------------------------------------------------------------------------------------------
+	else if @x<=0 and (select count(ticket.status) from ticket where ticket.train_id=@train_id)<(@a/10)
+	begin
+	set @avilable=2;
+	insert into ticket values(@date,'waiting',@pass_id,@train_id,@class);
+	update train set avilable_seats=avilable_seats-1;
+	
+	if @class='First Class'
+	begin
+
+		update train set first_class=first_class-1 where train_id=@train_id;
+
+	end
+	else if @class='Buisness Class'
+	begin
+		update train set business_class=business_class-1 where train_id=@train_id;
+
+	end
+	else if @class='Economic Class'
+	begin
+		update train set economy_class=economy_class-1 where train_id=@train_id;
+
+	end
+	end
+	-----------------------------------------------------------------------------------------------
+	else if @x >0
+	begin
+		set @avilable=1;
+		insert into ticket values(@date,'reserved',@pass_id,@train_id,@class)
+		update train set avilable_seats=avilable_seats-1;
+	
+		if @class='First Class'
+		begin
+
+			update train set first_class=first_class-1 where train_id=@train_id;
+
+		end
+		else if @class='Buisness Class'
+		begin
+			update train set business_class=business_class-1 where train_id=@train_id;
+
+		end
+		else if @class='Economic Class'
+		begin
+			update train set economy_class=economy_class-1 where train_id=@train_id;
+
+		end
+	end
+	----------------------------------------------------------------------------------
+	if(@avilable=1 or @avilable=2)
+	begin
+		set @departime =(select train.department_date from train where train_id=@train_id)
+		set @departlocation =(select train.department_location from train where train_id=@train_id)
+		set @train_arrival_time =(select train.arrival_date from train where train_id=@train_id)
+		set @train_arrivale_location =(select train.destination from train where train_id=@train_id)
+		set @duration =(select train.duration from train where train_id=@train_id)
+	end
+
+END
